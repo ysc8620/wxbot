@@ -2,6 +2,9 @@
 # coding: utf-8
 
 from wxbot import *
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 class MyWXBot(WXBot):

@@ -4,6 +4,9 @@
 from wxbot import *
 import ConfigParser
 import json
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8') 
 
 
 class TulingWXBot(WXBot):

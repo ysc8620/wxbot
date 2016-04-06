@@ -15,6 +15,9 @@ import random
 from requests.exceptions import ConnectionError, ReadTimeout
 import HTMLParser
 
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 UNKONWN = 'unkonwn'
 SUCCESS = '200'
 SCANED  = '201'
