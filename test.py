@@ -14,7 +14,7 @@ class MyWXBot(WXBot):
 
 
     def schedule(self):
-        self.send_msg('tb', 'schedule')
+        self.send_msg(u'机器猫', 'schedule')
         time.sleep(1)
 
 
