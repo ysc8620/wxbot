@@ -409,7 +409,7 @@ class WXBot:
         else:  # Self, Contact, Special, Public, Unknown
             pass
 
-        msg_prefix = (msg_content['user']['name'].decode('utf8') + ':') if 'user' in msg_content else ''
+        msg_prefix = (msg_content['user']['name'] + ':') if 'user' in msg_content else ''
 
         if mtype == 1:
             if content.find('http://weixin.qq.com/cgi-bin/redirectforward?args=') != -1:
