@@ -741,7 +741,7 @@ class WXBot:
         qr = pyqrcode.create(string)
         if self.conf['qr'] == 'png':
             qr.png(qr_file_path, scale=8)
-            show_image(qr_file_path)
+            # show_image(qr_file_path)
             # img = Image.open(qr_file_path)
             # img.show()
         elif self.conf['qr'] == 'tty':
