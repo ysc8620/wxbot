@@ -11,18 +11,17 @@ class MyWXBot(WXBot):
         try:
             bot = imp.load_module('bot',*imp.find_module('bot'))
             mybot = bot.bot()
-            self.get_contact_info()
             mybot.handle_msg_all(self, msg)
-        except Exception:
-            pass
+        except Exception as e:
+            print 'error=',e
 
     def schedule(self):
         try:
             bot = imp.load_module('bot',*imp.find_module('bot'))
             mybot = bot.bot()
             mybot.schedule(self)
-        except Exception:
-            pass
+        except Exception as e:
+            print 'error=',e
 
 
 

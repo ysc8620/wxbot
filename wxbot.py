@@ -166,7 +166,7 @@ class WXBot:
             group_members[gid] = members
         return group_members
 
-    def batch_get_group_members(self,qun_sn):
+    def init_get_group_members(self,qun_sn):
         """Get information of accounts in all groups at once."""
         url = self.base_uri + '/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s' % (int(time.time()), self.pass_ticket)
         params = {
@@ -181,23 +181,35 @@ class WXBot:
         for group in dic['ContactList']:
             res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
             row = res.fetchone()
-            if row != None:
+            if type(group['NickName']) == unicode or type(group['NickName']) == str:
+                group['NickName'] = group['NickName'].encode('utf-8')
+
+            if row == None:
                 #`number_no`, `UserName`, `NickName`, `HeadImgUrl`, `pic_url`, `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`, `status`
-                self.db.execute("INSERT INTO zml_qun (`UserName`, `NickName`, `HeadImgUrl`, "
-                                " `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
+                self.db.execute("INSERT INTO zml_qun (UserName, NickName, HeadImgUrl, "
+                                " OwnerUin, EncryChatRoomId, MemberCount, addtime)VALUES(%s,%s,%s,%s,%s,%s,%s)",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['OwnerUin'],group['EncryChatRoomId'],group['MemberCount'],time.time()])
             else:
-                self.db.execute("UPDATE zml_qun SET 'UserName'=%s,NickName=%s 'HeadImgUrl'=%s,MemberCount=%s WHERE EncryChatRoomId=%s",
+                self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s HeadImgUrl=%s,MemberCount=%s WHERE EncryChatRoomId=%s",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],group['EncryChatRoomId']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
+            qun_info = res.fetchone()
 
-            for user in group['MemberList']:
-                res = self.db.execute("SELECT * FROM zml_qun_user WHERE UserName=%s", [user['UserName']])
+            for u in group['MemberList']:
+                res = self.db.execute("SELECT * FROM zml_qun_user WHERE UserName=%s", [u['UserName']])
                 row = res.fetchone()
                 if row != None:
-                    pass
-                else:
-                    self.db.execute("UPDATE zml_qun_user SET 'NickName'=%s, 'update_time'=%s WHERE UserName=%s",
-                                            [user['NickName'],time.time(),user['UserName']])
+                    from_qun_id = ''
+                    if qun_info != None:
+                        if row['from_qun_id']:
+                            from_qun_id = row['from_qun_id']+str(qun_info['id'])+','
+                        else:
+                            from_qun_id = ','+str(qun_info['id'])+','
+                    if type(u['NickName']) == unicode or type(u['NickName']) == str:
+                        u['NickName'] = u['NickName'].encode('utf-8')
+
+                    self.db.execute("UPDATE zml_qun_user SET NickName=%s,update_time=%s,from_qun_id=%s WHERE UserName=%s",
+                                            [u['NickName'],time.time(),from_qun_id,u['UserName']])
         return group_members
 
     def get_group_member_name(self, gid, uid):
@@ -887,7 +899,7 @@ class WXBot:
                                       for keyVal in self.sync_key['List']])
         qun_sn = []
         if dic['BaseResponse']['Ret'] == 0:
-            for qun in dic['BaseResponse']['ContactList']:
+            for qun in dic['ContactList']:
                 if qun['UserName'][0:2] == '@@':
                     qun_sn.append({'UserName':qun['UserName']})
                     ##更新群
@@ -895,14 +907,13 @@ class WXBot:
                         #for t in user:
                         res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s", [user['Uin']])
                         row = res.fetchone()
-                        if row != None:
-                            self.db.execute("INSERT INTO zml_qun_user ('Uin', 'UserName', 'NickName',"
-                                            " 'AttrStatus', 'Alias', 'HeadImgUrl','addtime', 'update_time')VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
-                                            [user['Uin'],user['UserName'],user['NickName'],user['AttrStatus'],user['Alias'],user['HeadImgUrl'],time.time(),time.time()])
+                        if row == None:
+                            self.db.execute("INSERT INTO zml_qun_user (Uin, UserName,AttrStatus,addtime, update_time)VALUES(%s,%s,%s,%s,%s)",
+                                            [user['Uin'],user['UserName'],user['AttrStatus'],int(time.time()),int(time.time())])
                         else:
-                            self.db.execute("UPDATE zml_qun_user SET 'UserName'=%s, 'HeadImgUrl'=%s, 'update_time'=%s WHERE Uid=%s",
-                                            [user['UserName'],user['HeadImgUrl'],time.time(),user['Uid']])
-            self.batch_get_group_members(qun_sn)
+                            self.db.execute("UPDATE zml_qun_user SET UserName=%s,update_time=%s WHERE Uin=%s",
+                                            [user['UserName'],time.time(),user['Uin']])
+            self.init_get_group_members(qun_sn)
         return dic['BaseResponse']['Ret'] == 0
 
     def status_notify(self):

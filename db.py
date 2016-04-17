@@ -62,3 +62,12 @@ class DB:
 
     def __del__(self):
         self.close()
+
+#
+#INSERT INTO zml_qun (UserName, NickName, HeadImgUrl, OwnerUin, EncryChatRoomId, MemberCount, addtime)VALUES(%s,%s,%s,%s,%s,%s,%s)
+#[u'@@1d783201de1263c0af38583e6af45ab382cba3d7faa59b27b2e59354206760f1', u'2001\u5c4a\u4e09\u4e00\u73ed\u540c\u5b66\u7fa4', u'/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=647294210&username=@@1d783201de1263c0af38583e6af45ab382cba3d7faa59b27b2e59354206760f1&skey=', 1619120743, u'@acfa26a5a4533c64b4dc91e4703201da', 28, 1460891663.903]
+
+db = DB()
+db.execute("INSERT INTO zml_qun (UserName, NickName, HeadImgUrl, OwnerUin, EncryChatRoomId, MemberCount, addtime)VALUES(%s,%s,%s,%s,%s,%s,%s)",
+                                            [u'@@1d783201de1263c0af38583e6af45ab382cba3d7faa59b27b2e59354206760f1', u'sss', u'/cgi-bin/mmwebwx-bin/webwxgetheadimg?seq=647294210&username=@@1d783201de1263c0af38583e6af45ab382cba3d7faa59b27b2e59354206760f1&skey=', 1619120743, u'@acfa26a5a4533c64b4dc91e4703201da', 28, 1460891663.903]
+)
