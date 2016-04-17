@@ -14,6 +14,7 @@ import re
 import random
 from requests.exceptions import ConnectionError, ReadTimeout
 import HTMLParser
+from db import *
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -56,6 +57,7 @@ class WXBot:
         self.sync_key_str = ''
         self.sync_key = []
         self.sync_host = ''
+        self.db = DB()
 
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': 'Mozilla/5.0 (X11; Linux i686; U;) Gecko/20070322 Kazehakase/0.4.5'})
@@ -162,6 +164,40 @@ class WXBot:
             gid = group['UserName']
             members = group['MemberList']
             group_members[gid] = members
+        return group_members
+
+    def batch_get_group_members(self,qun_sn):
+        """Get information of accounts in all groups at once."""
+        url = self.base_uri + '/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s' % (int(time.time()), self.pass_ticket)
+        params = {
+            'BaseRequest': self.base_request,
+            "Count": len(qun_sn),
+            "List": [{"UserName": group['UserName'], "EncryChatRoomId": ""} for group in qun_sn]
+        }
+        r = self.session.post(url, data=json.dumps(params))
+        r.encoding = 'utf-8'
+        dic = json.loads(r.text)
+        group_members = {}
+        for group in dic['ContactList']:
+            res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
+            row = res.fetchone()
+            if row != None:
+                #`number_no`, `UserName`, `NickName`, `HeadImgUrl`, `pic_url`, `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`, `status`
+                self.db.execute("INSERT INTO zml_qun (`UserName`, `NickName`, `HeadImgUrl`, "
+                                " `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
+                                [group['UserName'],group['NickName'],group['HeadImgUrl'],group['OwnerUin'],group['EncryChatRoomId'],group['MemberCount'],time.time()])
+            else:
+                self.db.execute("UPDATE zml_qun SET 'UserName'=%s,NickName=%s 'HeadImgUrl'=%s,MemberCount=%s WHERE EncryChatRoomId=%s",
+                                [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],group['EncryChatRoomId']])
+
+            for user in group['MemberList']:
+                res = self.db.execute("SELECT * FROM zml_qun_user WHERE UserName=%s", [user['UserName']])
+                row = res.fetchone()
+                if row != None:
+                    pass
+                else:
+                    self.db.execute("UPDATE zml_qun_user SET 'NickName'=%s, 'update_time'=%s WHERE UserName=%s",
+                                            [user['NickName'],time.time(),user['UserName']])
         return group_members
 
     def get_group_member_name(self, gid, uid):
@@ -619,7 +655,7 @@ class WXBot:
             if check_time < 0.8:
                 time.sleep(1 - check_time)
 
-    def send_msg_by_uid(self, word, dst='filehelper'):
+    def send_msg_by_uid(self, word, dst='filehelper',msg_type=1,expand=''):
         url = self.base_uri + '/webwxsendmsg?pass_ticket=%s' % self.pass_ticket
         msg_id = str(int(time.time() * 1000)) + str(random.random())[:5].replace('.', '')
         if type(word) == 'str':
@@ -627,7 +663,7 @@ class WXBot:
         params = {
             'BaseRequest': self.base_request,
             'Msg': {
-                "Type": 1,
+                "Type": msg_type,
                 "Content": word,
                 "FromUserName": self.my_account['UserName'],
                 "ToUserName": dst,
@@ -635,6 +671,9 @@ class WXBot:
                 "ClientMsgId": msg_id
             }
         }
+
+        if expand != '':
+            dict(params['Msg'].items() + expand.items())
         headers = {'content-type': 'application/json; charset=UTF-8'}
         data = json.dumps(params, ensure_ascii=False).encode('utf8')
         try:
@@ -744,7 +783,7 @@ class WXBot:
         qr = pyqrcode.create(string)
         if self.conf['qr'] == 'png':
             qr.png(qr_file_path, scale=8)
-            # show_image(qr_file_path)
+            show_image(qr_file_path)
             # img = Image.open(qr_file_path)
             # img.show()
         elif self.conf['qr'] == 'tty':
@@ -846,6 +885,24 @@ class WXBot:
         self.my_account = dic['User']
         self.sync_key_str = '|'.join([str(keyVal['Key']) + '_' + str(keyVal['Val'])
                                       for keyVal in self.sync_key['List']])
+        qun_sn = []
+        if dic['BaseResponse']['Ret'] == 0:
+            for qun in dic['BaseResponse']['ContactList']:
+                if qun['UserName'][0:2] == '@@':
+                    qun_sn.append({'UserName':qun['UserName']})
+                    ##更新群
+                    for user in qun['MemberList']:
+                        #for t in user:
+                        res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s", [user['Uin']])
+                        row = res.fetchone()
+                        if row != None:
+                            self.db.execute("INSERT INTO zml_qun_user ('Uin', 'UserName', 'NickName',"
+                                            " 'AttrStatus', 'Alias', 'HeadImgUrl','addtime', 'update_time')VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
+                                            [user['Uin'],user['UserName'],user['NickName'],user['AttrStatus'],user['Alias'],user['HeadImgUrl'],time.time(),time.time()])
+                        else:
+                            self.db.execute("UPDATE zml_qun_user SET 'UserName'=%s, 'HeadImgUrl'=%s, 'update_time'=%s WHERE Uid=%s",
+                                            [user['UserName'],user['HeadImgUrl'],time.time(),user['Uid']])
+            self.batch_get_group_members(qun_sn)
         return dic['BaseResponse']['Ret'] == 0
 
     def status_notify(self):
