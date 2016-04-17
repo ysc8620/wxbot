@@ -53,6 +53,7 @@ class bot():
                         print c['remark']
                         res = self.session.post(self.api_url, data)
                         res.encoding = 'utf-8'
+                        print res.text
                         result = json.loads(res.text.encode('utf-8'))
                         print result
                         if result['msg_code'] == 10001:
