@@ -20,8 +20,8 @@ class DB:
 
     #self.conn = MySQLdb.connect(user='24a',db='test',passwd='24abcdef',host='localhost',unix_socket='/tmp/mysql.sock')#,unix_socket='/tmp/mysql.sock'
     def connect(self):
-        self.conn = MySQLdb.connect(user = 'root',db='zhimale',passwd = 'LEsc2008',host='localhost')
-        #self.conn = MySQLdb.connect(user='root',db='test',passwd='ntucdbs911',host='localhost',unix_socket='/tmp/mysql.sock')
+        #self.conn = MySQLdb.connect(user = 'root',db='zhimale',passwd = 'LEsc2008',host='localhost')
+        self.conn = MySQLdb.connect(user='root',db='sihuo',passwd='LEsc2008',host='localhost',unix_socket='/tmp/mysql.sock')
 
     def execute(self, sql, args=None):
         """
