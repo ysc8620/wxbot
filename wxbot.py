@@ -179,10 +179,11 @@ class WXBot:
         dic = json.loads(r.text)
         group_members = {}
         for group in dic['ContactList']:
-            res = self.db.execute("SELECT * FROM zml_qun WHERE `NickName`=%s", [group['NickName']])
-            row = res.fetchone()
             if type(group['NickName']) == unicode or type(group['NickName']) == str:
                 group['NickName'] = group['NickName'].encode('utf-8')
+
+            res = self.db.execute("SELECT * FROM zml_qun WHERE `NickName`=%s", [group['NickName']])
+            row = res.fetchone()
 
             if row == None:
                 #`number_no`, `UserName`, `NickName`, `HeadImgUrl`, `pic_url`, `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`, `status`
@@ -192,7 +193,7 @@ class WXBot:
             else:
                 self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s HeadImgUrl=%s,MemberCount=%s WHERE EncryChatRoomId=%s",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],group['EncryChatRoomId']])
-            res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE id=%s", [row['id']])
             qun_info = res.fetchone()
 
             for u in group['MemberList']:
