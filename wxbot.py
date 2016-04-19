@@ -491,16 +491,16 @@ class WXBot:
                         print '    %s[Text] %s' % (msg_prefix, msg_content['data'])
                     except UnicodeEncodeError:
                         print '    %s[Text] (illegal text).' % msg_prefix
-        elif mtype == 3:
+        elif mtype == 3 :
             msg_content['type'] = 3
             msg_content['data'] = self.get_msg_img_url(msg_id)
-            if self.DEBUG:
+            if self.DEBUG and False:
                 image = self.get_msg_img(msg_id)
                 print '    %s[Image] %s' % (msg_prefix, image)
         elif mtype == 34:
             msg_content['type'] = 4
             msg_content['data'] = self.get_voice_url(msg_id)
-            if self.DEBUG:
+            if self.DEBUG and False:
                 voice = self.get_voice(msg_id)
                 print '    %s[Voice] %s' % (msg_prefix, voice)
         elif mtype == 42:
@@ -902,6 +902,8 @@ class WXBot:
         if dic['BaseResponse']['Ret'] == 0:
             for qun in dic['ContactList']:
                 if qun['UserName'][0:2] == '@@':
+                    if(qun['NickName'] == 'sss'):
+                        continue
                     qun_sn.append({'UserName':qun['UserName']})
                     ##更新群
                     for user in qun['MemberList']:
