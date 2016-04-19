@@ -182,7 +182,7 @@ class WXBot:
             if type(group['NickName']) == unicode or type(group['NickName']) == str:
                 group['NickName'] = group['NickName'].encode('utf-8')
 
-            res = self.db.execute("SELECT * FROM zml_qun WHERE `NickName`=%s", [group['NickName']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE NickName=%s", [group['NickName']])
             row = res.fetchone()
 
             if row == None:
@@ -191,8 +191,8 @@ class WXBot:
                                 " OwnerUin, EncryChatRoomId, MemberCount, addtime)VALUES(%s,%s,%s,%s,%s,%s,%s)",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['OwnerUin'],group['EncryChatRoomId'],group['MemberCount'],time.time()])
             else:
-                self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s HeadImgUrl=%s,MemberCount=%s WHERE EncryChatRoomId=%s",
-                                [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],group['EncryChatRoomId']])
+                self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s HeadImgUrl=%s,MemberCount=%s WHERE id=%s",
+                                [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],row['id']])
             res = self.db.execute("SELECT * FROM zml_qun WHERE id=%s", [row['id']])
             qun_info = res.fetchone()
 
