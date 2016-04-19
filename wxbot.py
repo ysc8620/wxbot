@@ -184,9 +184,6 @@ class WXBot:
 
             res = self.db.execute("SELECT * FROM zml_qun WHERE NickName=%s", [group['NickName']])
             row = res.fetchone()
-            print '---------------'
-            print row
-            print '+++++++++++++++'
 
             if row == None:
                 #`number_no`, `UserName`, `NickName`, `HeadImgUrl`, `pic_url`, `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`, `status`
@@ -194,7 +191,7 @@ class WXBot:
                                 " OwnerUin, EncryChatRoomId, MemberCount, addtime)VALUES(%s,%s,%s,%s,%s,%s,%s)",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['OwnerUin'],group['EncryChatRoomId'],group['MemberCount'],time.time()])
             else:
-                self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s HeadImgUrl=%s,MemberCount=%s WHERE id=%s",
+                self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s, HeadImgUrl=%s,MemberCount=%s WHERE id=%s",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],row['id']])
             res = self.db.execute("SELECT * FROM zml_qun WHERE id=%s", [row['id']])
             qun_info = res.fetchone()
