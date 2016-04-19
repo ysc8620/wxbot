@@ -184,6 +184,7 @@ class WXBot:
 
             res = self.db.execute("SELECT * FROM zml_qun WHERE NickName=%s", [group['NickName']])
             row = res.fetchone()
+            print row
 
             if row == None:
                 #`number_no`, `UserName`, `NickName`, `HeadImgUrl`, `pic_url`, `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`, `status`
