@@ -179,7 +179,7 @@ class WXBot:
         dic = json.loads(r.text)
         group_members = {}
         for group in dic['ContactList']:
-            res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE `NickName`=%s", [group['NickName']])
             row = res.fetchone()
             if type(group['NickName']) == unicode or type(group['NickName']) == str:
                 group['NickName'] = group['NickName'].encode('utf-8')

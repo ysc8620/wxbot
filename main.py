@@ -15,13 +15,13 @@ class MyWXBot(WXBot):
         except Exception as e:
             print 'error=',e
 
-    def schedule(self):
-        try:
-            bot = imp.load_module('bot',*imp.find_module('bot'))
-            mybot = bot.bot()
-            mybot.schedule(self)
-        except Exception as e:
-            print 'error=',e
+    # def schedule(self):
+    #     try:
+    #         bot = imp.load_module('bot',*imp.find_module('bot'))
+    #         mybot = bot.bot()
+    #         mybot.schedule(self)
+    #     except Exception as e:
+    #         print 'error=',e
 
 
 
