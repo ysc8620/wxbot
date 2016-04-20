@@ -55,7 +55,7 @@ class bot():
                         res.encoding = 'utf-8'
                         print res.text
                         result = json.loads(res.text.encode('utf-8'))
-                        print result
+                        #print result
                         if result['msg_code'] == 10001:
                             wxbot.send_msg_by_uid(result['data']['message'], result['data']['uid'],result['data']['type'],result['data']['expand'])
 
