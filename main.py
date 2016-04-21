@@ -36,7 +36,7 @@ class MyWXBot(WXBot):
 
     def schedule(self):
         # if(time.time())
-        res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['27287265'])
+        res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
         row = res.fetchone()
         if row:
             try:
