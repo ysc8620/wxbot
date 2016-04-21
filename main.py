@@ -15,7 +15,7 @@ class MyWXBot(WXBot):
         res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['27287265'])
         row = res.fetchone()
         if row:
-            self.send_msg_by_uid('维护消息'+str(time.time()),row['UserName'],1)
+            self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
 
 
     def handle_msg_all(self, msg):
