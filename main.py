@@ -7,11 +7,11 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 class MyWXBot(WXBot):
-    def __init__(self):
-        WXBot.__init__(self)
-        self.auto_send_message()
+    # def __init__(self):
+        # WXBot.__init__(self)
+        # self.auto_send_message()
 
-    def auto_send_message(self):
+    def schedule(self):
         res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['27287265'])
         row = res.fetchone()
         if row:

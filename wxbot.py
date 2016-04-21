@@ -79,6 +79,9 @@ class WXBot:
         self.group_list = []  # group chat list
         self.special_list = []  # special list account
 
+    def auto_send_message(self):
+        pass
+
     def get_contact(self):
         """Get information of all contacts of current account."""
         url = self.base_uri + '/webwxgetcontact?pass_ticket=%s&skey=%s&r=%s' \
