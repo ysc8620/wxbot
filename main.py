@@ -34,13 +34,17 @@ class MyWXBot(WXBot):
         except Exception as e:
             print 'error=',e
 
-    # def schedule(self):
-    #     try:
-    #         bot = imp.load_module('bot',*imp.find_module('bot'))
-    #         mybot = bot.bot()
-    #         mybot.schedule(self)
-    #     except Exception as e:
-    #         print 'error=',e
+    def schedule(self):
+        # if(time.time())
+        res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['27287265'])
+        row = res.fetchone()
+        if row:
+            try:
+                self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
+            except Exception:
+                print 'auto message error'
+                pass
+        time.sleep(60)
 
 
 
