@@ -18,7 +18,11 @@ class MyWXBot(WXBot):
             UserName = row['UserName']
             while True:
                 time.sleep(100)
-                self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
+                try:
+                    self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
+                except Exception:
+                    print 'auto message error'
+                    pass
 
 
 
