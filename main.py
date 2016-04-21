@@ -35,6 +35,7 @@ class MyWXBot(WXBot):
             print 'error=',e
 
     def schedule(self):
+        print '-----------------'
         # if(time.time())
         res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
         row = res.fetchone()
