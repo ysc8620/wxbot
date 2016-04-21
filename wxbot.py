@@ -193,7 +193,7 @@ class WXBot:
             else:
                 self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s, HeadImgUrl=%s,MemberCount=%s WHERE id=%s",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],row['id']])
-            res = self.db.execute("SELECT * FROM zml_qun WHERE id=%s", [row['id']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE UserName=%s", [group['UserName']])
             qun_info = res.fetchone()
 
             for u in group['MemberList']:
@@ -203,12 +203,15 @@ class WXBot:
                     from_qun_id = ''
                     if qun_info != None:
                         if row['from_qun_id']:
-                            from_qun_id = row['from_qun_id']+str(qun_info['id'])+','
+                            if row['from_qun_id'].find(','+str(qun_info['id'])+',') > -1:
+                                from_qun_id = row['from_qun_id']
+                            else:
+                                from_qun_id = row['from_qun_id']+str(qun_info['id'])+','
                         else:
                             from_qun_id = ','+str(qun_info['id'])+','
                     if type(u['NickName']) == unicode or type(u['NickName']) == str:
                         u['NickName'] = u['NickName'].encode('utf-8')
-
+                    #print u
                     self.db.execute("UPDATE zml_qun_user SET NickName=%s,update_time=%s,from_qun_id=%s WHERE UserName=%s",
                                             [u['NickName'],time.time(),from_qun_id,u['UserName']])
         return group_members
@@ -647,8 +650,10 @@ class WXBot:
             check_time = time.time()
             [retcode, selector] = self.sync_check()
             if retcode == '1100':  # logout from mobile
+                print 'Logout From Mobile'
                 break
             elif retcode == '1101':  # login web WeChat from other devide
+                print 'Login web WeChat from other devide'
                 break
             elif retcode == '0':
                 if selector == '2':  # new message
@@ -892,8 +897,15 @@ class WXBot:
             'BaseRequest': self.base_request
         }
         r = self.session.post(url, data=json.dumps(params))
+
         r.encoding = 'utf-8'
         dic = json.loads(r.text)
+
+        # f = open('/wx.log','w+')
+        # f.write("====================================================================\r\n")
+        # f.write(json.dumps(dic))
+        # f.write("====================================================================\r\n")
+        # f.close()
         self.sync_key = dic['SyncKey']
         self.my_account = dic['User']
         self.sync_key_str = '|'.join([str(keyVal['Key']) + '_' + str(keyVal['Val'])
@@ -902,11 +914,12 @@ class WXBot:
         if dic['BaseResponse']['Ret'] == 0:
             for qun in dic['ContactList']:
                 if qun['UserName'][0:2] == '@@':
-                    if(qun['NickName'] == 'sss'):
+                    if(qun['NickName'] == 'sss' or qun['NickName'] == ''):
                         continue
                     qun_sn.append({'UserName':qun['UserName']})
                     ##更新群
                     for user in qun['MemberList']:
+                        #print user
                         #for t in user:
                         res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s", [user['Uin']])
                         row = res.fetchone()
