@@ -11,18 +11,18 @@ class MyWXBot(WXBot):
         # WXBot.__init__(self)
         # self.auto_send_message()
 
-    def schedule(self):
-        res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['27287265'])
-        row = res.fetchone()
-        if row:
-            UserName = row['UserName']
-            while True:
-                time.sleep(100)
-                try:
-                    self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
-                except Exception:
-                    print 'auto message error'
-                    pass
+    # def schedule(self):
+    #     res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['27287265'])
+    #     row = res.fetchone()
+    #     if row:
+    #         UserName = row['UserName']
+    #         while True:
+    #             time.sleep(100)
+    #             try:
+    #                 self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
+    #             except Exception:
+    #                 print 'auto message error'
+    #                 pass
 
 
 
@@ -35,18 +35,17 @@ class MyWXBot(WXBot):
             print 'error=',e
 
     def schedule(self):
-        print '-----------------'
-        # if(time.time())
-        res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
-        row = res.fetchone()
-        if row:
-            try:
-                print row['NickName'], row['UserName']
-                self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
-            except Exception:
-                print 'auto message error'
-                pass
-        time.sleep(60)
+        if time.time() - 120 > self.last_time:
+            self.last_time = time.time()
+            res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
+            row = res.fetchone()
+            if row:
+                try:
+                    print row['NickName'], row['UserName']
+                    self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
+                except Exception:
+                    print 'auto message error'
+                    pass
 
 
 

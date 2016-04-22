@@ -58,6 +58,7 @@ class WXBot:
         self.sync_key = []
         self.sync_host = ''
         self.db = DB()
+        self.last_time = time.time()
 
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': 'Mozilla/5.0 (X11; Linux i686; U;) Gecko/20070322 Kazehakase/0.4.5'})
@@ -917,8 +918,8 @@ class WXBot:
         if dic['BaseResponse']['Ret'] == 0:
             for qun in dic['ContactList']:
                 if qun['UserName'][0:2] == '@@':
-                    if(qun['NickName'] == 'sss' or qun['NickName'] == ''):
-                        continue
+                    # if(qun['NickName'] == 'sss' or qun['NickName'] == ''):
+                    #     continue
                     qun_sn.append({'UserName':qun['UserName']})
                     ##更新群
                     for user in qun['MemberList']:
@@ -933,6 +934,7 @@ class WXBot:
                             self.db.execute("UPDATE zml_qun_user SET UserName=%s,update_time=%s WHERE Uin=%s",
                                             [user['UserName'],time.time(),user['Uin']])
             self.init_get_group_members(qun_sn)
+        self.last_time = time.time()
         return dic['BaseResponse']['Ret'] == 0
 
     def status_notify(self):
