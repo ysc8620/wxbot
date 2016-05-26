@@ -2,11 +2,14 @@
 # coding: utf-8
 
 from wxbot import *
-import sys, imp
+import sys, imp,redis
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 class MyWXBot(WXBot):
+    def __init__(self):
+        WXBot.__init__(self)
+        self.redis = redis.Redis(host='localhost',port=6379,db=0)
     # def __init__(self):
         # WXBot.__init__(self)
         # self.auto_send_message()
@@ -24,8 +27,6 @@ class MyWXBot(WXBot):
     #                 print 'auto message error'
     #                 pass
 
-
-
     def handle_msg_all(self, msg):
         try:
             bot = imp.load_module('bot',*imp.find_module('bot'))
@@ -35,19 +36,18 @@ class MyWXBot(WXBot):
             print 'error=',e
 
     def schedule(self):
-        if time.time() - 120 > self.last_time:
-            self.last_time = time.time()
-            res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
-            row = res.fetchone()
-            if row:
-                try:
-                    print u""+row['NickName']+u'='+ row['UserName']
-                    self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
-                except Exception:
-                    print 'auto message error'
-                    pass
-
-
+        pass
+        # if time.time() - 120 > self.last_time:
+        #     self.last_time = time.time()
+        #     res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
+        #     row = res.fetchone()
+        #     if row:
+        #         try:
+        #             print u""+row['NickName']+u'='+ row['UserName']
+        #             self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
+        #         except Exception:
+        #             print 'auto message error'
+        #             pass
 
 def main():
     bot = MyWXBot()
@@ -56,5 +56,8 @@ def main():
     bot.run()
 
 if __name__ == '__main__':
-    print 'start'
+    # print 'start'
+    # s = redis.Redis(host='localhost',port=6379,db=0)
+    # s.set('a11', 123)
+    # print s.get('a11')
     main()

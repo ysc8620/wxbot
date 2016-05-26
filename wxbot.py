@@ -180,13 +180,14 @@ class WXBot:
         }
         r = self.session.post(url, data=json.dumps(params))
         r.encoding = 'utf-8'
+        logs(r.text, './newqun.log')
         dic = json.loads(r.text)
         group_members = {}
         for group in dic['ContactList']:
             if type(group['NickName']) == unicode or type(group['NickName']) == str:
                 group['NickName'] = group['NickName'].encode('utf-8')
 
-            res = self.db.execute("SELECT * FROM zml_qun WHERE NickName=%s", [group['NickName']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
             row = res.fetchone()
 
             if row == None:
@@ -197,7 +198,7 @@ class WXBot:
             else:
                 self.db.execute("UPDATE zml_qun SET UserName=%s,NickName=%s, HeadImgUrl=%s,MemberCount=%s WHERE id=%s",
                                 [group['UserName'],group['NickName'],group['HeadImgUrl'],group['MemberCount'],row['id']])
-            res = self.db.execute("SELECT * FROM zml_qun WHERE UserName=%s", [group['UserName']])
+            res = self.db.execute("SELECT * FROM zml_qun WHERE EncryChatRoomId=%s", [group['EncryChatRoomId']])
             qun_info = res.fetchone()
 
             for u in group['MemberList']:
@@ -359,6 +360,8 @@ class WXBot:
             for member in self.group_members[group]:
                 if member['UserName'] == wx_user_id:
                     return 'group_member'
+        #if( wx_user_id[:2] == '@@' ):
+
         return 'unknown'
 
     def is_contact(self, uid):
@@ -463,7 +466,7 @@ class WXBot:
             if not name:
                 name = self.get_group_member_prefer_name(self.get_group_member_name(uid, msg['FromUserName']))
             if not name:
-                name = 'unknown'
+                name = 'unknown:'+str(msg_type_id)
             msg_content['user'] = {'id': uid, 'name': name}
         else:  # Self, Contact, Special, Public, Unknown
             pass
@@ -598,7 +601,10 @@ class WXBot:
         :param r: The raw data of the messages.
         :return: None
         """
+        #print
         for msg in r['AddMsgList']:
+            #print '-----------------------------'
+            #print msg
             msg_type_id = 99
             user = {'id': msg['FromUserName'], 'name': 'unknown'}
             if msg['MsgType'] == 51:  # init message
@@ -637,6 +643,8 @@ class WXBot:
                        'content': content,
                        'to_user_id': msg['ToUserName'],
                        'user': user}
+            #print '=============================='
+            #print message
             self.handle_msg_all(message)
 
     def schedule(self):
@@ -904,7 +912,7 @@ class WXBot:
 
         r.encoding = 'utf-8'
         dic = json.loads(r.text)
-
+        # logs(r.text, './oldqun.log')
         # f = open('/wx.log','w+')
         # f.write("====================================================================\r\n")
         # f.write(json.dumps(dic))
@@ -974,7 +982,12 @@ class WXBot:
         try:
             r = self.session.get(url, timeout=60)
         except (ConnectionError, ReadTimeout):
+            print '------------------------error'
             return [-1, -1]
+        print '------------------------'
+        print url
+        print '------------------------'
+        print r.text
         r.encoding = 'utf-8'
         data = r.text
         pm = re.search(r'window.synccheck=\{retcode:"(\d+)",selector:"(\d+)"\}', data)

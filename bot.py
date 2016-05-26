@@ -20,13 +20,13 @@ class bot():
             self.api = cf.get('base','api')
             self.appsecret = cf.get('base','appsecret')
 
-            self.command_path = cf.get('base','command_path')
-            fopen = open(self.command_path)
-            try:
-                command_str = fopen.read()
-                self.command_list = json.loads(command_str)
-            finally:
-                 fopen.close( )
+            # self.command_path = cf.get('base','command_path')
+            # fopen = open(self.command_path)
+            # try:
+            #     command_str = fopen.read()
+            #     self.command_list = json.loads(command_str)
+            # finally:
+            #      fopen.close( )
         except Exception as e:
             print 'error=',e
 
@@ -44,20 +44,28 @@ class bot():
             }
             #print data
             try:
-                # 匹配是否是命令行
-                for c in self.command_list:
-                    pattern = re.compile(r"^\s*"+u""+c['command']+"\s*$")
-                    # 使用Pattern匹配文本，获得匹配结果，无法匹配时将返回None
-                    match = pattern.match(msg['content']['data'])
-                    if match:
-                        print c['remark']
-                        res = self.session.post(self.api_url, data)
-                        res.encoding = 'utf-8'
-                        print res.text
-                        result = json.loads(res.text.encode('utf-8'))
-                        #print result
-                        if result['msg_code'] == 10001:
-                            wxbot.send_msg_by_uid(result['data']['message'], result['data']['uid'],result['data']['type'],result['data']['expand'])
+                res = self.session.post(self.api_url, data)
+                res.encoding = 'utf-8'
+                print res.text
+                result = json.loads(res.text.encode('utf-8'))
+                #print result
+                if result['msg_code'] == 10001:
+                    wxbot.send_msg_by_uid(result['data']['message'], result['data']['uid'],result['data']['type'],result['data']['expand'])
+
+                # # 匹配是否是命令行
+                # for c in self.command_list:
+                #     pattern = re.compile(r"^\s*"+u""+c['command']+"\s*$")
+                #     # 使用Pattern匹配文本，获得匹配结果，无法匹配时将返回None
+                #     match = pattern.match(msg['content']['data'])
+                #     if match:
+                #         print c['remark']
+                #         res = self.session.post(self.api_url, data)
+                #         res.encoding = 'utf-8'
+                #         print res.text
+                #         result = json.loads(res.text.encode('utf-8'))
+                #         #print result
+                #         if result['msg_code'] == 10001:
+                #             wxbot.send_msg_by_uid(result['data']['message'], result['data']['uid'],result['data']['type'],result['data']['expand'])
 
             except Exception as e:
                 print 'error=',e
