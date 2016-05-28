@@ -20,8 +20,6 @@ class bot():
             self.api = cf.get('base','api')
             self.appsecret = cf.get('base','appsecret')
 
-            self.wxbot = wxbot
-
             # self.command_path = cf.get('base','command_path')
             # fopen = open(self.command_path)
             # try:
@@ -44,12 +42,13 @@ class bot():
                 'api' : self.api,
                 'time' : int(time.time())
             }
-            #print data
+
             try:
                 res = self.session.post(self.api_url, data)
                 res.encoding = 'utf-8'
+                print res.text
                 result = json.loads(res.text.encode('utf-8'))
-                #print result
+
                 if result['msg_code'] == 10001:
                     wxbot.send_msg_by_uid(result['data']['message'], result['data']['uid'],result['data']['type'],result['data']['expand'])
 
@@ -73,6 +72,4 @@ class bot():
 
 
     def schedule(self, wxbot):
-
-        #wxbot.send_msg('群助理','')
-        time.sleep(10)
+        pass

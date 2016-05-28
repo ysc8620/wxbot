@@ -36,18 +36,12 @@ class MyWXBot(WXBot):
             print 'error=',e
 
     def schedule(self):
-        pass
-        # if time.time() - 120 > self.last_time:
-        #     self.last_time = time.time()
-        #     res = self.db.execute("SELECT * FROM zml_qun_user WHERE Uin=%s",['234004768'])
-        #     row = res.fetchone()
-        #     if row:
-        #         try:
-        #             print u""+row['NickName']+u'='+ row['UserName']
-        #             self.send_msg_by_uid(u'维护消息'+str(time.time()),row['UserName'],1)
-        #         except Exception:
-        #             print 'auto message error'
-        #             pass
+        try:
+            bot = imp.load_module('bot',*imp.find_module('bot'))
+            mybot = bot.bot(self)
+            mybot.schedule(self)
+        except Exception as e:
+            print 'error=',e
 
 def main():
     bot = MyWXBot()

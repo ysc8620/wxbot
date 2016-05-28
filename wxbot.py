@@ -179,10 +179,9 @@ class WXBot:
             "Count": len(qun_sn),
             "List": [{"UserName": group['UserName'], "EncryChatRoomId": ""} for group in qun_sn]
         }
-        #print params
+
         r = self.session.post(url, data=json.dumps(params))
         r.encoding = 'utf-8'
-        logs(r.text, './'+str(time.time())+'newqun.log')
         dic = json.loads(r.text)
         group_members = {}
         for group in dic['ContactList']:
@@ -194,9 +193,9 @@ class WXBot:
 
             if row == None:
                 #`number_no`, `UserName`, `NickName`, `HeadImgUrl`, `pic_url`, `OwnerUin`, `EncryChatRoomId`, `MemberCount`, `addtime`, `status`
-                self.db.execute("INSERT INTO zml_qun (UserName,  HeadImgUrl, "
-                                " OwnerUin, EncryChatRoomId, MemberCount, addtime,robot_id,last_login_num)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",
-                                [group['UserName'],group['HeadImgUrl'],group['OwnerUin'],group['EncryChatRoomId'],group['MemberCount'],time.time(),self.uin,self.last_login_num])
+                self.db.execute("INSERT INTO zml_qun (UserName, NickName, HeadImgUrl, "
+                                " OwnerUin, EncryChatRoomId, MemberCount, addtime,robot_id,last_login_num)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                [group['UserName'],group['NickName'], group['HeadImgUrl'],group['OwnerUin'],group['EncryChatRoomId'],group['MemberCount'],time.time(),self.uin,self.last_login_num])
             else:
                 self.db.execute("UPDATE zml_qun SET UserName=%s,EncryChatRoomId=%s, HeadImgUrl=%s,MemberCount=%s,last_login_num=%s WHERE id=%s",
                                 [group['UserName'],group['EncryChatRoomId'],group['HeadImgUrl'],group['MemberCount'],self.last_login_num,row['id']])
@@ -218,7 +217,6 @@ class WXBot:
                             from_qun_id = ','+str(qun_info['id'])+','
                     if type(u['NickName']) == unicode or type(u['NickName']) == str:
                         u['NickName'] = u['NickName'].encode('utf-8')
-                    #print u
                     self.db.execute("UPDATE zml_qun_user SET NickName=%s,update_time=%s,from_qun_id=%s,last_login_num=%s WHERE UserName=%s",
                                             [u['NickName'],time.time(),from_qun_id,self.last_login_num,u['UserName']])
                 else:
@@ -608,8 +606,6 @@ class WXBot:
         """
         #print
         for msg in r['AddMsgList']:
-            #print '-----------------------------'
-            #print msg
             msg_type_id = 99
             user = {'id': msg['FromUserName'], 'name': 'unknown'}
             if msg['MsgType'] == 51:  # init message
@@ -929,12 +925,12 @@ class WXBot:
 
         r.encoding = 'utf-8'
         dic = json.loads(r.text)
-        logs(r.text, './oldqun.log')
-        f = open('/wx.log','w+')
-        f.write("====================================================================\r\n")
-        f.write(json.dumps(dic))
-        f.write("====================================================================\r\n")
-        f.close()
+        # logs(r.text, './oldqun.log')
+        # f = open('/wx.log','w+')
+        # f.write("====================================================================\r\n")
+        # f.write(json.dumps(dic))
+        # f.write("====================================================================\r\n")
+        # f.close()
         self.sync_key = dic['SyncKey']
         self.my_account = dic['User']
         self.sync_key_str = '|'.join([str(keyVal['Key']) + '_' + str(keyVal['Val'])
@@ -1017,10 +1013,6 @@ class WXBot:
         except (ConnectionError, ReadTimeout):
             print '------------------------error'
             return [-1, -1]
-        print '------------------------'
-        print url
-        print '------------------------'
-        print r.text
         r.encoding = 'utf-8'
         data = r.text
         pm = re.search(r'window.synccheck=\{retcode:"(\d+)",selector:"(\d+)"\}', data)
@@ -1049,13 +1041,11 @@ class WXBot:
                                           for keyVal in self.sync_key['List']])
         try:
             qun =  dic['AddMsgList'][0]['StatusNotifyUserName']
-            print qun
             qun = qun.split(',')
             str_qun = []
             for i in qun:
                 if i.find('@@') != -1:
                     str_qun.append({'UserName':i})
-            print str_qun
             if len(str_qun) > 0:
                 self.init_get_group_members(str_qun)
         except:
