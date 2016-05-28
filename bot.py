@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import sys, time, requests, json, ConfigParser,re,hashlib
+import sys, time, requests, json, ConfigParser,re,hashlib,redis
 from db import *
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 class bot():
-    def __init__(self):
+    def __init__(self,wxbot):
         try:
             self.session = requests.Session()
             self.session.headers.update({'User-Agent': 'Mozilla/5.0 (X11; Linux i686; U;) Gecko/20070322 Kazehakase/0.4.5'})
@@ -19,6 +19,8 @@ class bot():
 
             self.api = cf.get('base','api')
             self.appsecret = cf.get('base','appsecret')
+
+            self.wxbot = wxbot
 
             # self.command_path = cf.get('base','command_path')
             # fopen = open(self.command_path)
@@ -46,7 +48,6 @@ class bot():
             try:
                 res = self.session.post(self.api_url, data)
                 res.encoding = 'utf-8'
-                print res.text
                 result = json.loads(res.text.encode('utf-8'))
                 #print result
                 if result['msg_code'] == 10001:
@@ -72,5 +73,6 @@ class bot():
 
 
     def schedule(self, wxbot):
+
         #wxbot.send_msg('群助理','')
         time.sleep(10)

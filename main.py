@@ -30,7 +30,7 @@ class MyWXBot(WXBot):
     def handle_msg_all(self, msg):
         try:
             bot = imp.load_module('bot',*imp.find_module('bot'))
-            mybot = bot.bot()
+            mybot = bot.bot(self)
             mybot.handle_msg_all(self, msg)
         except Exception as e:
             print 'error=',e
