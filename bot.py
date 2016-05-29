@@ -16,6 +16,7 @@ class bot():
             cf = ConfigParser.ConfigParser()
             cf.read('base.ini')
             self.api_url = cf.get('base','url')
+            self.redis = redis.Redis(host='localhost',port=6379)
 
             self.api = cf.get('base','api')
             self.appsecret = cf.get('base','appsecret')
@@ -72,4 +73,13 @@ class bot():
 
 
     def schedule(self, wxbot):
-        pass
+        while 1:
+            msg = self.redis.rpop("robot_"+wxbot.uin)
+            if(msg):
+                print msg
+                msg = json.loads(msg)
+                print msg
+                wxbot.send_msg_by_uid(msg['msg'], msg['uid'])
+
+            else:
+                break
